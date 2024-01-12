@@ -1,7 +1,7 @@
 node_modules
 npm-debug.log
-dist
 pgdata
+dist
 .git
 Dockerfile
 docker-compose.yml
