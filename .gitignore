@@ -5,6 +5,9 @@
 # Nest env variables
 .env
 
+#db
+/pgdata
+
 # Logs
 logs
 *.log
