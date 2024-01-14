@@ -1,6 +1,6 @@
-import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { QuizService } from './quiz.service';
-import { Quiz } from './quiz.entity';
+import { Quiz } from './entities/quiz.entity';
 import { CreateQuizInput } from './dto/create-quiz.input';
 
 @Resolver((of) => Quiz)
@@ -13,7 +13,7 @@ export class QuizResolver {
   }
 
   @Query((returns) => Quiz)
-  getQuiz(@Args('id', { type: () => Int }) id: number): Promise<Quiz> {
+  getQuiz(@Args('id', { type: () => String }) id: string): Promise<Quiz> {
     return this.quizService.findOne(id);
   }
 

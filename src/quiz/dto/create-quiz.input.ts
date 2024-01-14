@@ -3,7 +3,7 @@ import { IsAlpha } from 'class-validator';
 
 @InputType()
 export class CreateQuizInput {
-  @Field()
+  @Field(() => String)
   name: string;
 
   @Field({ nullable: true })

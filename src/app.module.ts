@@ -4,6 +4,8 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { join } from 'path';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { QuestionsModule } from './questions/questions.module';
+import { AnswersModule } from './answers/answers.module';
 import * as process from 'process';
 
 @Module({
@@ -24,6 +26,8 @@ import * as process from 'process';
       autoLoadEntities: true,
     }),
     QuizModule,
+    QuestionsModule,
+    AnswersModule,
   ],
 })
 export class AppModule {}
