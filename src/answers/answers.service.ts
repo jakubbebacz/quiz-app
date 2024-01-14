@@ -1,25 +1,24 @@
 import { Injectable } from '@nestjs/common';
 import { CreateAnswerInput } from './dto/create-answer.input';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { QueryRunner } from 'typeorm';
 import { Answer } from './entities/answer.entity';
 
 @Injectable()
 export class AnswersService {
-  constructor(
-    @InjectRepository(Answer)
-    private answersRepository: Repository<Answer>,
-  ) {}
+  async createAnswer(
+    createAnswersInput: CreateAnswerInput[],
+    questionId: string,
+    queryRunner: QueryRunner,
+  ): Promise<void> {
+    for (const createAnswerInput of createAnswersInput) {
+      const answer = queryRunner.manager.create(Answer, {
+        name: createAnswerInput.name,
+        isCorrect: createAnswerInput.isCorrect ?? null,
+        sortOrder: createAnswerInput.sortOrder ?? null,
+        questionId,
+      });
 
-  findAll() {
-    return `This action returns all answers`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} answer`;
-  }
-
-  create(createAnswerInput: CreateAnswerInput) {
-    return 'This action adds a new answer';
+      await queryRunner.manager.save(answer);
+    }
   }
 }
