@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateAnswerInput } from './dto/create-answer.input';
 import { QueryRunner } from 'typeorm';
 import { Answer } from './entities/answer.entity';
+import { QuestionType } from '../questions/enums/question-type.enum';
 
 @Injectable()
 export class AnswersService {

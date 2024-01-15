@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 import { Quiz } from '../../quiz/entities/quiz.entity';
 import { Answer } from '../../answers/entities/answer.entity';
-import { QuestionType } from '../../helpers/question-type.enum';
+import { QuestionType } from '../enums/question-type.enum';
 
 @Entity()
 @ObjectType()

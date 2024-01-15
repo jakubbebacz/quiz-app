@@ -1,5 +1,5 @@
 import { InputType, Field } from '@nestjs/graphql';
-import { QuestionType } from '../../helpers/question-type.enum';
+import { QuestionType } from '../enums/question-type.enum';
 import { CreateAnswerInput } from '../../answers/dto/create-answer.input';
 
 @InputType()

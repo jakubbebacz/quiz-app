@@ -1,19 +1,29 @@
 import { Injectable } from '@nestjs/common';
 import { CreateQuestionInput } from './dto/create-question.input';
-import { QueryRunner } from 'typeorm';
+import { QueryRunner, Repository } from 'typeorm';
 import { Question } from './entities/question.entity';
 import { AnswersService } from '../answers/answers.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { CheckAnswersInput } from '../quiz/dto/check-answers.input';
+import { CheckAnswersResponse } from '../quiz/dto/check-answers.response';
+import { QuestionType } from './enums/question-type.enum';
+import { Answer } from '../answers/entities/answer.entity';
 
 @Injectable()
 export class QuestionsService {
-  constructor(private readonly answersService: AnswersService) {}
+  constructor(
+    @InjectRepository(Question)
+    private questionRepository: Repository<Question>,
+    private readonly answersService: AnswersService,
+  ) {}
 
-  findAll() {
-    return `This action returns all questions`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} question`;
+  async findOne(id: string): Promise<Question> {
+    return this.questionRepository.findOneOrFail({
+      where: {
+        id,
+      },
+      relations: ['answers'],
+    });
   }
 
   async createQuestions(
