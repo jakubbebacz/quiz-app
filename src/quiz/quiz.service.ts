@@ -14,18 +14,20 @@ export class QuizService {
     private readonly dataSource: DataSource,
   ) {}
   async findAll(): Promise<Quiz[]> {
-    return this.quizRepository.find({
-      relations: ['questions', 'questions.answers'],
-    });
+    return this.quizRepository.find();
   }
 
-  async findOne(id: string): Promise<Quiz> {
+  async findOne(id: string, isCreated: boolean): Promise<Quiz> {
     const quiz = await this.quizRepository.findOneOrFail({
       where: {
         id,
       },
       relations: ['questions', 'questions.answers'],
     });
+
+    if (isCreated) {
+      return quiz;
+    }
 
     return {
       ...quiz,
@@ -46,20 +48,20 @@ export class QuizService {
     try {
       const quiz = queryRunner.manager.create(Quiz, {
         name: createQuizInput.name,
-        type: createQuizInput.type,
+        description: createQuizInput.description,
       });
 
-      const response = await queryRunner.manager.save(quiz);
+      const createdQuiz = await queryRunner.manager.save(quiz);
 
       await this.questionsService.createQuestions(
         createQuizInput.questions,
-        response.id,
+        createdQuiz.id,
         queryRunner,
       );
 
       await queryRunner.commitTransaction();
 
-      return response;
+      return this.findOne(createdQuiz.id, true);
     } catch (err) {
       await queryRunner.rollbackTransaction();
     } finally {

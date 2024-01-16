@@ -11,7 +11,24 @@ import { QuestionType } from '../../questions/enums/question-type.enum';
 import { CreateQuizInput } from '../dto/create-quiz.input';
 import { CreateQuestionInput } from '../../questions/dto/create-question.input';
 import { CreateAnswerInput } from '../../answers/dto/create-answer.input';
-import { dataSourceMock } from '../../common/mock.datasource';
+
+export type MockType<T> = {
+  [P in keyof T]?: jest.Mock<QueryRunner>;
+};
+
+export const dataSourceMock: () => MockType<DataSource> = jest.fn(() => ({
+  createQueryRunner: jest.fn().mockImplementation(() => ({
+    connect: jest.fn(),
+    startTransaction: jest.fn(),
+    manager: {
+      create: jest.fn(),
+      save: jest.fn().mockResolvedValue({ id: '1' }),
+    },
+    commitTransaction: jest.fn(),
+    rollbackTransaction: jest.fn(),
+    release: jest.fn(),
+  })),
+}));
 
 describe('QuizService', () => {
   let quizService: QuizService;
@@ -69,7 +86,7 @@ describe('QuizService', () => {
         .spyOn(quizRepository, 'findOneOrFail')
         .mockResolvedValue(sampleQuizzes[0]);
 
-      const result = await quizService.findOne(quizId);
+      const result = await quizService.findOne(quizId, false);
 
       expect(result).toEqual(sampleQuizzes[0]);
     });
@@ -79,7 +96,7 @@ describe('QuizService', () => {
     it('should create a new quiz with questions and answers', async () => {
       const createQuizInput: CreateQuizInput = {
         name: 'General knowledge',
-        type: '123',
+        description: '123',
         questions: [
           {
             name: 'What color is a plum',
@@ -113,6 +130,7 @@ describe('QuizService', () => {
       };
 
       jest.spyOn(questionsService, 'createQuestions').mockResolvedValue();
+      jest.spyOn(quizService, 'findOne').mockResolvedValue(sampleQuizzes[0]);
 
       const result = await quizService.createQuiz(createQuizInput);
 

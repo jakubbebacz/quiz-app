@@ -1,4 +1,4 @@
-import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { QuizService } from './quiz.service';
 import { Quiz } from './entities/quiz.entity';
 import { CreateQuizInput } from './dto/create-quiz.input';
@@ -14,24 +14,33 @@ export class QuizResolver {
   ) {}
 
   @Query(() => [Quiz])
-  quiz(): Promise<Quiz[]> {
+  async quiz(): Promise<Quiz[]> {
     return this.quizService.findAll();
   }
 
   @Query(() => Quiz)
-  getQuiz(@Args('id', { type: () => String }) id: string): Promise<Quiz> {
-    return this.quizService.findOne(id);
+  async getQuiz(
+    @Args('id', { type: () => String }) id: string,
+    @Args('isCreated', {
+      type: () => Boolean,
+      nullable: true,
+      defaultValue: false,
+    })
+    isCreated: boolean,
+  ): Promise<Quiz> {
+    return this.quizService.findOne(id, isCreated);
   }
 
   @Mutation(() => Quiz)
-  createQuiz(
-    @Args('createQuizInput') createQuizInput: CreateQuizInput,
+  async createQuiz(
+    @Args('createQuizInput', { type: () => CreateQuizInput })
+    createQuizInput: CreateQuizInput,
   ): Promise<Quiz> {
     return this.quizService.createQuiz(createQuizInput);
   }
 
   @Mutation(() => CheckAnswersResponse)
-  checkAnswers(
+  async checkAnswers(
     @Args('checkAnswersInput', { type: () => [CheckAnswersInput] })
     checkAnswersInput: CheckAnswersInput[],
   ): Promise<CheckAnswersResponse> {
