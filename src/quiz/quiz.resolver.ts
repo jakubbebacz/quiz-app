@@ -2,12 +2,16 @@ import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { QuizService } from './quiz.service';
 import { Quiz } from './entities/quiz.entity';
 import { CreateQuizInput } from './dto/create-quiz.input';
-import { CheckAnswersInput } from './dto/check-answers.input';
-import { CheckAnswersResponse } from './dto/check-answers.response';
+import { CheckAnswersInput } from '../questions/dto/check-answers.input';
+import { CheckAnswersResponse } from '../questions/dto/check-answers.response';
+import { QuestionsService } from '../questions/questions.service';
 
 @Resolver(() => Quiz)
 export class QuizResolver {
-  constructor(private quizService: QuizService) {}
+  constructor(
+    private readonly quizService: QuizService,
+    private readonly questionsService: QuestionsService,
+  ) {}
 
   @Query(() => [Quiz])
   quiz(): Promise<Quiz[]> {
@@ -31,6 +35,6 @@ export class QuizResolver {
     @Args('checkAnswersInput', { type: () => [CheckAnswersInput] })
     checkAnswersInput: CheckAnswersInput[],
   ): Promise<CheckAnswersResponse> {
-    return this.quizService.checkAnswers(checkAnswersInput);
+    return this.questionsService.checkAnswers(checkAnswersInput);
   }
 }

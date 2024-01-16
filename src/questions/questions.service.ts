@@ -4,8 +4,8 @@ import { QueryRunner, Repository } from 'typeorm';
 import { Question } from './entities/question.entity';
 import { AnswersService } from '../answers/answers.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CheckAnswersInput } from '../quiz/dto/check-answers.input';
-import { CheckAnswersResponse } from '../quiz/dto/check-answers.response';
+import { CheckAnswersInput } from './dto/check-answers.input';
+import { CheckAnswersResponse } from './dto/check-answers.response';
 import { QuestionType } from './enums/question-type.enum';
 import { Answer } from '../answers/entities/answer.entity';
 
@@ -46,5 +46,71 @@ export class QuestionsService {
         queryRunner,
       );
     }
+  }
+
+  async checkAnswers(
+    checkAnswersInput: CheckAnswersInput[],
+  ): Promise<CheckAnswersResponse> {
+    let totalPoints: number = 0;
+    let pointsScored: number = 0;
+
+    for (const checkAnswerInput of checkAnswersInput) {
+      const question = await this.findOne(checkAnswerInput.questionId);
+
+      totalPoints += this.calculateQuestionPoints(question);
+
+      if (question.type === QuestionType.PlainText) {
+        question.answers[0]?.name === checkAnswerInput.plainAnswerText &&
+          pointsScored++;
+        continue;
+      }
+
+      let sortNumber = 1;
+      for (const answerId of checkAnswerInput.answerIds!) {
+        const answer = question.answers.find(
+          (answer: Answer) => answer.id == answerId,
+        );
+
+        if (question.type === QuestionType.Sorting) {
+          answer.sortOrder === sortNumber && pointsScored++;
+          sortNumber++;
+          continue;
+        }
+        if (
+          (question.type === QuestionType.Single ||
+            question.type === QuestionType.Multiple) &&
+          answer.isCorrect
+        ) {
+          pointsScored++;
+        }
+        if (question.type == QuestionType.Multiple && !answer.isCorrect) {
+          pointsScored--;
+        }
+      }
+    }
+
+    return { pointsScored, totalPoints };
+  }
+
+  private calculateQuestionPoints(question: Question): number {
+    let questionPoints = 0;
+
+    switch (question.type) {
+      case QuestionType.Single:
+        questionPoints++;
+        break;
+      case QuestionType.Multiple:
+        questionPoints = question.answers.filter(
+          (answer) => answer.isCorrect == true,
+        ).length;
+        break;
+      case QuestionType.Sorting:
+        questionPoints = question.answers.length;
+        break;
+      case QuestionType.PlainText:
+        questionPoints++;
+        break;
+    }
+    return questionPoints;
   }
 }
