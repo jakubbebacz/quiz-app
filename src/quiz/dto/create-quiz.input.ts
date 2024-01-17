@@ -9,18 +9,20 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { CreateQuestionInput } from '../../questions/dto/create-question.input';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 
 @InputType()
 export class CreateQuizInput {
   @Field(() => String)
   @IsNotEmpty()
   @IsString()
+  @Transform(({ value }) => value.trim())
   name: string;
 
   @Field(() => String, { nullable: true })
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => (value ? value.trim() : null))
   description?: string;
 
   @Field(() => [CreateQuestionInput])

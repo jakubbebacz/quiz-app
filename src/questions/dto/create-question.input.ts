@@ -10,19 +10,21 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 
 @InputType()
 export class CreateQuestionInput {
   @Field(() => String)
   @IsNotEmpty()
   @IsString()
+  @Transform(({ value }) => value.trim())
   name: string;
 
   @Field(() => QuestionType)
   @IsNotEmpty()
   @IsString()
   @IsEnum(QuestionType, { message: 'Invalid question type' })
+  @Transform(({ value }) => value.trim())
   type: string;
 
   @Field(() => [CreateAnswerInput])

@@ -9,12 +9,14 @@ import {
   Min,
 } from 'class-validator';
 import { IsEitherDefined } from '../../common/decorators/is-either-defined.decorator';
+import { Transform } from 'class-transformer';
 
 @InputType()
 export class CreateAnswerInput {
   @Field(() => String)
   @IsNotEmpty()
   @IsString()
+  @Transform(({ value }) => value.trim())
   name: string;
 
   @Field(() => Boolean, { nullable: true })

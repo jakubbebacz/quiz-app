@@ -62,8 +62,10 @@ export class QuestionsService {
         totalPoints += this.calculateQuestionPoints(question);
 
         if (question.type === QuestionType.PlainText) {
-          question.answers[0]?.name === checkAnswerInput.plainAnswerText &&
-            pointsScored++;
+          const trimmedAnswer = checkAnswerInput.plainAnswerText
+            .replace(/\p{P}+/gu, '')
+            .trim();
+          question.answers[0].name === trimmedAnswer && pointsScored++;
           continue;
         }
 
