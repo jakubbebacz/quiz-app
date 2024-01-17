@@ -52,20 +52,6 @@ describe('QuestionsService', () => {
     expect(questionsService).toBeDefined();
   });
 
-  describe('findOne', () => {
-    it('should return a question with answers', async () => {
-      const questionId: string = '1';
-
-      jest
-        .spyOn(questionsRepository, 'findOneOrFail')
-        .mockResolvedValue(sampleQuestions[0]);
-
-      const result = await questionsService.findOne(questionId);
-
-      expect(result).toEqual(sampleQuestions[0]);
-    });
-  });
-
   describe('createQuestions', () => {
     it('should create questions and answers', async () => {
       const createQuestionsInput: CreateQuestionInput[] = [
@@ -161,7 +147,7 @@ describe('QuestionsService', () => {
   it('should return object with points scored and total points for plain text question type', async () => {
     const checkAnswersInput: CheckAnswersInput[] = [
       {
-        questionId: '3',
+        questionId: '4',
         plainAnswerText: '1919',
       },
     ];

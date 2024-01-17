@@ -1,4 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateQuestionInput } from './dto/create-question.input';
 import { QueryRunner, Repository } from 'typeorm';
 import { Question } from './entities/question.entity';
@@ -16,15 +21,6 @@ export class QuestionsService {
     private questionRepository: Repository<Question>,
     private readonly answersService: AnswersService,
   ) {}
-
-  async findOne(id: string): Promise<Question> {
-    return this.questionRepository.findOneOrFail({
-      where: {
-        id,
-      },
-      relations: ['answers'],
-    });
-  }
 
   async createQuestions(
     createQuestionsInput: CreateQuestionInput[],
@@ -55,37 +51,52 @@ export class QuestionsService {
     let pointsScored: number = 0;
 
     for (const checkAnswerInput of checkAnswersInput) {
-      const question = await this.findOne(checkAnswerInput.questionId);
+      try {
+        const question = await this.questionRepository.findOneOrFail({
+          where: {
+            id: checkAnswerInput.questionId,
+          },
+          relations: ['answers'],
+        });
 
-      totalPoints += this.calculateQuestionPoints(question);
+        totalPoints += this.calculateQuestionPoints(question);
 
-      if (question.type === QuestionType.PlainText) {
-        question.answers[0]?.name === checkAnswerInput.plainAnswerText &&
-          pointsScored++;
-        continue;
-      }
-
-      let sortNumber = 1;
-      for (const answerId of checkAnswerInput.answerIds!) {
-        const answer = question.answers.find(
-          (answer: Answer) => answer.id == answerId,
-        );
-
-        if (question.type === QuestionType.Sorting) {
-          answer.sortOrder === sortNumber && pointsScored++;
-          sortNumber++;
+        if (question.type === QuestionType.PlainText) {
+          question.answers[0]?.name === checkAnswerInput.plainAnswerText &&
+            pointsScored++;
           continue;
         }
-        if (
-          (question.type === QuestionType.Single ||
-            question.type === QuestionType.Multiple) &&
-          answer.isCorrect
-        ) {
-          pointsScored++;
+
+        let sortNumber = 1;
+        for (const answerId of checkAnswerInput.answerIds!) {
+          const answer = question.answers.find(
+            (answer: Answer) => answer.id == answerId,
+          );
+
+          if (question.type === QuestionType.Sorting) {
+            answer.sortOrder === sortNumber && pointsScored++;
+            sortNumber++;
+            continue;
+          }
+          if (
+            (question.type === QuestionType.Single ||
+              question.type === QuestionType.Multiple) &&
+            answer.isCorrect
+          ) {
+            pointsScored++;
+          }
+          if (question.type == QuestionType.Multiple && !answer.isCorrect) {
+            pointsScored--;
+          }
         }
-        if (question.type == QuestionType.Multiple && !answer.isCorrect) {
-          pointsScored--;
+      } catch (err) {
+        if (err.name === 'EntityNotFoundError') {
+          throw new NotFoundException(
+            `Question ${checkAnswerInput.questionId} was not found`,
+          );
         }
+
+        throw new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
       }
     }
 

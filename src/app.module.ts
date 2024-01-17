@@ -13,6 +13,20 @@ import * as process from 'process';
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.sql'),
+      formatError: (error) => {
+        const originalError = error.extensions?.originalError as any;
+
+        if (!originalError) {
+          return {
+            message: error.message,
+            code: error.extensions?.status,
+          };
+        }
+        return {
+          message: originalError.message,
+          code: error.extensions?.status,
+        };
+      },
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
