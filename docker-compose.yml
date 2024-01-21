@@ -6,11 +6,13 @@ services:
     restart: always
     environment:
       - POSTGRES_PASSWORD=postgres
+      - POSTGRES_PORT=${DB_PORT}
+    command: [ "postgres", "-p", "${DB_PORT}" ]
     container_name: postgres
     volumes:
       - ./pgdata:/var/lib/postgresql/data
     ports:
-      - '5432:5432'
+      - '${DB_PORT}:${DB_PORT}'
 
   api:
     build:
@@ -20,17 +22,6 @@ services:
       - .env
     container_name: nest-docker
     ports:
-      - '3000:3000'
-    depends_on:
-      - db
-
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: pgadmin
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
-      - PGADMIN_DEFAULT_PASSWORD=pgadmin4
-    ports:
-      - '5050:80'
+      - '${SERVER_PORT}:${SERVER_PORT}'
     depends_on:
       - db

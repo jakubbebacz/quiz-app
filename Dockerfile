@@ -12,7 +12,7 @@ RUN npm run build
 
 RUN ["npm", "run", "test"]
 
-EXPOSE 3000
+EXPOSE $SERVER_PORT
 
 CMD ["npm", "run", "start"]
 
