@@ -1,4 +1,4 @@
-import { InputType, Field } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import { QuestionType } from '../enums/question-type.enum';
 import { CreateAnswerInput } from '../../answers/dto/create-answer.input';
 import {

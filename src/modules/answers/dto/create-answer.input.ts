@@ -8,7 +8,7 @@ import {
   Max,
   Min,
 } from 'class-validator';
-import { IsEitherDefined } from '../../common/decorators/is-either-defined.decorator';
+import { IsEitherDefined } from '../../../common/decorators/is-either-defined.decorator';
 import { Transform } from 'class-transformer';
 
 @InputType()

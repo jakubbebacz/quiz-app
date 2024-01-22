@@ -11,8 +11,8 @@ import { AnswersService } from '../answers/answers.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CheckAnswersInput } from './dto/check-answers.input';
 import { CheckAnswersResponse } from './dto/check-answers.response';
-import { QuestionType } from './enums/question-type.enum';
-import { Answer } from '../answers/entities/answer.entity';
+import { CalculateQuestionPointsContext } from './calculate-question-points.strategy';
+import { CalculatePointsScoredContext } from './calculate-points-scored.strategy';
 
 @Injectable()
 export class QuestionsService {
@@ -59,38 +59,16 @@ export class QuestionsService {
           relations: ['answers'],
         });
 
-        totalPoints += this.calculateQuestionPoints(question);
+        const calculateQuestionPointsContext =
+          new CalculateQuestionPointsContext();
+        totalPoints +=
+          calculateQuestionPointsContext.calculateQuestionPoints(question);
 
-        if (question.type === QuestionType.PlainText) {
-          const trimmedAnswer = checkAnswerInput.plainAnswerText
-            .replace(/\p{P}+/gu, '')
-            .trim();
-          question.answers[0].name === trimmedAnswer && pointsScored++;
-          continue;
-        }
-
-        let sortNumber = 1;
-        for (const answerId of checkAnswerInput.answerIds!) {
-          const answer = question.answers.find(
-            (answer: Answer) => answer.id == answerId,
-          );
-
-          if (question.type === QuestionType.Sorting) {
-            answer.sortOrder === sortNumber && pointsScored++;
-            sortNumber++;
-            continue;
-          }
-          if (
-            (question.type === QuestionType.Single ||
-              question.type === QuestionType.Multiple) &&
-            answer.isCorrect
-          ) {
-            pointsScored++;
-          }
-          if (question.type == QuestionType.Multiple && !answer.isCorrect) {
-            pointsScored--;
-          }
-        }
+        const calculatePointsScoredContext = new CalculatePointsScoredContext();
+        pointsScored += calculatePointsScoredContext.calculatePointsScored(
+          question,
+          checkAnswerInput,
+        );
       } catch (err) {
         if (err.name === 'EntityNotFoundError') {
           throw new NotFoundException(
@@ -103,27 +81,5 @@ export class QuestionsService {
     }
 
     return { pointsScored, totalPoints };
-  }
-
-  private calculateQuestionPoints(question: Question): number {
-    let questionPoints = 0;
-
-    switch (question.type) {
-      case QuestionType.Single:
-        questionPoints++;
-        break;
-      case QuestionType.Multiple:
-        questionPoints = question.answers.filter(
-          (answer) => answer.isCorrect == true,
-        ).length;
-        break;
-      case QuestionType.Sorting:
-        questionPoints = question.answers.length;
-        break;
-      case QuestionType.PlainText:
-        questionPoints++;
-        break;
-    }
-    return questionPoints;
   }
 }

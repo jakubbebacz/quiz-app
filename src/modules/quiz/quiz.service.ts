@@ -10,7 +10,6 @@ import { DataSource, Repository } from 'typeorm';
 import { CreateQuizInput } from './dto/create-quiz.input';
 import { QuestionsService } from '../questions/questions.service';
 import { QuestionType } from '../questions/enums/question-type.enum';
-import { errorContext } from 'rxjs/internal/util/errorContext';
 
 @Injectable()
 export class QuizService {

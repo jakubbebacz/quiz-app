@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
-import { QuizModule } from './quiz/quiz.module';
+import { QuizModule } from './modules/quiz/quiz.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { join } from 'path';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { QuestionsModule } from './questions/questions.module';
-import { AnswersModule } from './answers/answers.module';
+import { QuestionsModule } from './modules/questions/questions.module';
+import { AnswersModule } from './modules/answers/answers.module';
 import * as process from 'process';
 
 @Module({
